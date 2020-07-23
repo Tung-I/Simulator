@@ -15,7 +15,8 @@ import gym
 from bullet.tm700 import tm700
 from bullet.tm700_possensor_Gym import tm700_possensor_gym
 
-DATA_ROOT = '/home/tony/datasets/ShapeNet_3obj'
+cwd = os.getcwd()
+DATA_ROOT = os.path.join(cwd, 'ShapeNet_3obj')
 
 class tm700_rgbd_gym(tm700_possensor_gym):
   """Class for tm700 environment with diverse objects.
