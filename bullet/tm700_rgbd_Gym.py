@@ -14,6 +14,8 @@ from pkg_resources import parse_version
 import gym
 from bullet.tm700 import tm700
 from bullet.tm700_possensor_Gym import tm700_possensor_gym
+from matplotlib import pylab as plt
+import cv2
 
 cwd = os.getcwd()
 DATA_ROOT = os.path.join(cwd, 'ShapeNet_3obj')
@@ -159,8 +161,9 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     p.setTimeStep(self._timeStep)
     p.loadURDF(os.path.join(self._urdfRoot, "plane.urdf"), [0, 0, -1])
 
-    self.table_pose = [0.5000000, 0.00000, -.640000, 0.000000, 0.000000, 0.0, 1.0]
+    self.table_pose = [.5000000, 0.00000, -.640000, 0.000000, 0.000000, 0.0, 1.0]
     self.tableUid = p.loadURDF(os.path.join(self._urdfRoot, "table/table.urdf"), *self.table_pose)
+
 
     p.setGravity(0, 0, -10)
     self._tm700 = tm700(urdfRootPath=self._urdfRoot, timeStep=self._timeStep)
@@ -168,9 +171,86 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     self._envStepCounter = 0
     p.stepSimulation()
 
+
+
     self._objectUids = self._randomly_place_objects(self._objList)
+
+    # luben
+    self._get_all_obj_shot(self._objList)
+
     self._observation = self._get_observation()
     return np.array(self._observation)
+  
+  #luben
+  def _get_all_obj_shot(self,objList):
+    """Take a shot of all objects
+    """
+
+    # create a table for taking a shot of object
+    shot_table_pose = [.5000000, 1.50000, -.640000, 0.000000, 0.000000, 0.0, 1.0]
+    shotTableUid = p.loadURDF(os.path.join(self._urdfRoot, "table/table.urdf"), *shot_table_pose)
+
+    p.changeVisualShape(objectUniqueId=shotTableUid,linkIndex=-1,rgbaColor=[0,0,0,0])
+
+    shift = [0, -0.02, 0]
+    meshScale = [0.2, 0.2, 0.2]
+    x_pos = 0.5
+    y_pos = 1.5
+    for idx, obj_path in enumerate(objList):
+        visualShapeId = p.createVisualShape(shapeType=p.GEOM_MESH,
+                                            fileName=obj_path,
+                                            rgbaColor=[1, 1, 1, 1],
+                                            specularColor=[0.4, .4, 0],
+                                            visualFramePosition=shift,
+                                            meshScale=meshScale)
+        collisionShapeId = p.createCollisionShape(shapeType=p.GEOM_MESH,
+                                            fileName=obj_path,
+                                            collisionFramePosition=shift,
+                                            meshScale=meshScale)
+
+        uid = p.createMultiBody(baseMass=1,
+                               baseInertialFramePosition=[-0.2, 0, 0],
+                               baseCollisionShapeIndex=collisionShapeId,
+                               baseVisualShapeIndex=visualShapeId,
+                               basePosition=[x_pos, y_pos, 0.15],
+                               useMaximalCoordinates=True)
+
+        for _ in range(1000):
+            p.stepSimulation()
+
+        yaw = 0
+        for i in range(18):
+            if i < 6:
+                look = [0.5, 1.5, 0]
+                distance = 0.65
+                pitch = 0
+                roll = 0
+            elif i >=6 and i < 12:
+                look = [0.5, 1.5, 0.35]
+                distance = 0.35
+                pitch = -90
+                roll = 0
+            else:
+                look = [0.5, 1.5, 0]
+                distance = 0.65
+                pitch = -50
+                roll = 0
+
+            view_matrix = p.computeViewMatrixFromYawPitchRoll(look, distance, yaw, pitch, roll, 2)
+            yaw -= 60
+            img_arr = p.getCameraImage(self._width, self._height,view_matrix, self._proj_matrix)
+            w = img_arr[0]  # width of the image, in pixels
+            h = img_arr[1]  # height of the image, in pixels
+            rgb = img_arr[2]  # color data RGB
+            np_img_arr = np.reshape(rgb, (h, w, 4))
+            np_img_arr = np_img_arr[:,:,:3]
+            img = cv2.cvtColor(np_img_arr,cv2.COLOR_RGB2BGR)
+            cv2.imwrite('shot/obj'+str(idx+1)+'-'+str(i+1)+'.png', img)
+        p.removeBody(uid)
+    p.removeBody(shotTableUid)
+
+
+
 
   def _randomly_place_objects(self, objList):
     """Randomly places the objects in the bin.
@@ -198,10 +278,12 @@ class tm700_rgbd_gym(tm700_possensor_gym):
                         baseInertialFramePosition=[-0.2, 0, 0],
                         baseCollisionShapeIndex=collisionShapeId,
                         baseVisualShapeIndex=visualShapeId,
-                        basePosition=[xpos, ypos, .15],
+                        basePosition=[xpos, ypos, 0.15],
                         useMaximalCoordinates=True)
 
         objectUids.append(uid)
+
+
         for _ in range(1000):
             p.stepSimulation()
 
