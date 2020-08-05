@@ -76,7 +76,8 @@ class _fsodRCNN(nn.Module):
         self.n_way = n_way
         self.n_shot = n_shot
 
-    def forward(self, im_data, im_info, gt_boxes, num_boxes, support_ims, all_cls_gt_boxes=None):
+    def forward(self, im_data, im_info, gt_boxes, num_boxes, support_ims, all_cls_gt_boxes=None, n_shot=5):
+        self.n_shot = n_shot
         if self.training:
             self.num_of_rois = cfg.TRAIN.BATCH_SIZE
         else:

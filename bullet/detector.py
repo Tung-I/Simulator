@@ -128,9 +128,9 @@ def visualize_result(rois, cls_prob, bbox_pred, im_info, im2show, cfg):
     keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
     cls_dets = cls_dets[keep.view(-1).long()]
 
-    im2show = vis_detections(im2show, ' ', cls_dets.cpu().numpy(), 0.5)
+    im2show = vis_detections(im2show, ' ', cls_dets.cpu().numpy(), 0.65)
 
-    return im2show
+    return im2show, cls_dets
 
 
 if __name__ == '__main__':
