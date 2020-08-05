@@ -10,7 +10,7 @@ import numpy as np
 import copy
 import math
 import random
-from scipy.spatial.transform import Rotation as sciRotation
+# from scipy.spatial.transform import Rotation as sciRotation
 
 class tm700:
 

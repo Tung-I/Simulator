@@ -15,7 +15,7 @@ import random
 import pybullet_data
 from pkg_resources import parse_version
 import tm700
-from scipy.spatial.transform import Rotation as sciRotation
+# from scipy.spatial.transform import Rotation as sciRotation
 largeValObservation = 100
 
 RENDER_HEIGHT = 720

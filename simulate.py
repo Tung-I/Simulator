@@ -29,8 +29,8 @@ if __name__ == '__main__':
     test = tm700_rgbd_gym(width=720, height=720, numObjects=7, objRoot='../YCB_valset_urdf')
     for ite in range(1000):
         test.reset()
-        tm_link_name_to_index = get_name_to_link(test._tm700.tm700Uid)
-        table_link_name_to_index = get_name_to_link(test.tableUid)
-        obj_link_name_to_index = []
-        for uid in test._objectUids:
-            obj_link_name_to_index.append((uid, get_name_to_link(uid)))
+        # tm_link_name_to_index = get_name_to_link(test._tm700.tm700Uid)
+        # table_link_name_to_index = get_name_to_link(test.tableUid)
+        # obj_link_name_to_index = []
+        # for uid in test._objectUids:
+        #     obj_link_name_to_index.append((uid, get_name_to_link(uid)))
