@@ -185,6 +185,7 @@ class tm700_rgbd_gym(tm700_possensor_gym):
         # detection
         self.n_shot += 1
         self._observation, query_rgb = self._get_observation()
+
         target_cls_name = 'mug'
         support_im_dict = self._get_all_obj_shot(self._objList)
         for k in support_im_dict.keys():
@@ -212,7 +213,7 @@ class tm700_rgbd_gym(tm700_possensor_gym):
         im2show = query_rgb.copy()
         im_result, dets = visualize_result(rois, cls_prob, bbox_pred, im_info, im2show, cfg)
 
-        # im = support_data[0][:, :, ::-1]/255
+        im = support_data[0][:, :, ::-1]/255
         print(f'current number of shots: {support_ims.size(1)}')
         print(dets)
         cv2.imshow('support', self.support_data_pool[target_cls_name][self.n_shot - 1][:, :, ::-1] / 255.)
